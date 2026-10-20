@@ -1,0 +1,11 @@
+[package]
+name = "craft-undo"
+description = "Shared undo/redo stack for the Craft apps: commands, coalescing and a clean-state marker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true

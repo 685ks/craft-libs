@@ -690,6 +690,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "craft-undo"
+version = "0.1.0"
+
+[[package]]
 name = "craft-winprint-gdi"
 version = "0.1.0"
 source = "git+https://github.com/storytold/winprint.rs?rev=417ac3c4d14d3da5485a99c7d5ce8f05664ec312#417ac3c4d14d3da5485a99c7d5ce8f05664ec312"

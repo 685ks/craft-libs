@@ -43,4 +43,6 @@ First tagged release. Every crate starts at 0.1.0.
 - `craft-tokens`: the house design tokens generated from `tokens.json`, with egui conversions.
 - `craft-ui`: SVG catalogs, icon buttons, tabs, pane controls, transactional docking, print
   settings, theme helpers and the `house` theme and components.
+- `craft-undo`: the shared undo/redo stack with a command trait, coalescing, menu labels, a
+  depth limit, the clean-state marker and a revision counter for autosave.
 - Release tooling: this changelog, `scripts/check-version.sh` and the **Tag release** workflow.
