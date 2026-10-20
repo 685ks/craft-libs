@@ -48,4 +48,6 @@ First tagged release. Every crate starts at 0.1.0.
   depth limit, the clean-state marker and a revision counter for autosave.
 - `craft-recent`: the Open Recent list, autosave timing with back-off, and crash-recovery
   snapshots on `craft-atomic` and `craft-settings`, with orphan detection by session lock.
+- `craft-secrets`: OS keychain storage for the secrets a `SecretRef` names (the `keyring`
+  crate), with an in-memory store and `KeyChange` support.
 - Release tooling: this changelog, `scripts/check-version.sh` and the **Tag release** workflow.

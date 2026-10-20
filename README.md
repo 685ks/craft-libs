@@ -46,6 +46,8 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 
 - [`craft-recent`](crates/recent/README.md): the Open Recent list (a serde type for the app's
   settings), autosave timing, and crash-recovery snapshots with orphan detection by session lock.
+- [`craft-secrets`](crates/secrets/README.md): OS keychain storage (macOS Keychain, Windows
+  Credential Manager, Secret Service) for the secrets a `SecretRef` names, plus an in-memory store.
 - [`craft-settings`](crates/settings/README.md): `config.toml` settings storage for every app: platform folders, portable mode and overrides, atomic saves while running, backup, damaged-file recovery and schema migrations. Policy in [docs/settings-storage.md](docs/settings-storage.md).
 - [`craft-undo`](crates/undo/README.md): the shared undo/redo stack: a command trait, coalescing
   of adjacent edits, undo/redo with menu labels, a depth limit and the clean-state marker.
