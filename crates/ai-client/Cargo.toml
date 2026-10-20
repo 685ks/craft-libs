@@ -1,0 +1,22 @@
+[package]
+name = "craft-ai-client"
+description = "HTTP adapters for craft-ai-core: OpenAI-compatible servers, Ollama and Black Forest Labs, with streaming, polling, timeouts and retries"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+# Desktop only: it opens sockets and threads. craft-ai-core stays the wasm-safe contract.
+[dependencies]
+craft-ai-core = { workspace = true }
+craft-secrets = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+ureq = { version = "3.4", default-features = false, features = ["rustls"] }
+
+[dev-dependencies]
+serde_json = { workspace = true }

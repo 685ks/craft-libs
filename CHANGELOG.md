@@ -19,6 +19,12 @@ bump (`0.1` to `0.2`) may break the public API of any crate; a patch bump does n
 
 ## [Unreleased]
 
+### Added
+
+- `craft-ai-client`: `Provider` adapters over HTTP for OpenAI-compatible servers (OpenAI, LM
+  Studio, vLLM), Ollama and Black Forest Labs image jobs, with SSE and NDJSON streaming, job
+  polling, timeouts, retry with backoff and API keys from a `SecretStore`.
+
 ## [0.1.0] - 2026-10-20
 
 First tagged release. Every crate starts at 0.1.0.

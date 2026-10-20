@@ -27,6 +27,9 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 - [`craft-pdf`](crates/pdf/README.md): independently optional PDF parsing, interpretation, rasterization and guarded authoring. Apps retain layout, fonts, editing and export policy; writer-only consumers do not enable the shared reader.
 
 - [`craft-tokens`](crates/tokens/README.md): the house design tokens (colours, type, spacing, radii, shadows, motion) generated from `tokens.json`, with optional egui conversions. `craft-ui`'s `house` module turns them into the egui theme and shared components (framed panel and header, status boxes, chips, the primary button with its busy state, skeletons).
+- [`craft-ai-client`](crates/ai-client/README.md): HTTP providers for craft-ai-core: OpenAI-compatible
+  servers (OpenAI, LM Studio, vLLM), Ollama and Black Forest Labs image jobs, with streaming,
+  polling, timeouts, retries and keys from `craft-secrets`. Desktop only.
 - [`craft-atomic`](crates/atomic/README.md): Crash-safe atomic file writing and replacement with same-directory staging, directory fsync, Apple `F_FULLFSYNC` fallback, transient lock backoff, and fault injection for the Craft suite.
 - [`craft-cms`](crates/cms/README.md): pure-Rust ICC v2/v4 colour management: profile parsing
   and writing, transforms, rendering intents, black point compensation, soft proofing, gamut
