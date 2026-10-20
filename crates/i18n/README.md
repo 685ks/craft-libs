@@ -36,8 +36,8 @@ The app keeps its `tl!` macro, its language setting (`"auto"` → `I18N.system_l
 ## Behaviour
 
 - **Offered locales:** `I18n::new` takes the codes the app offers (its own language list), so an
-  app never offers a language its interface isn't ready for (Arabic without right-to-left layout,
-  say). `languages()`, `from_code`, `match_tag` and `system_lang` only return offered locales; an
+  app never offers a language its interface isn't ready for (Arabic before its layout is
+  mirrored, say). `languages()`, `from_code`, `match_tag` and `system_lang` only return offered locales; an
   embedded locale that isn't offered still serves as a fallback (`pt` for an offered `pt-br`).
 - **Fallback:** locale by locale along the chain, `pt-br` → `pt` → the English source text. In
   each locale, app rows override shared ones, and `tc`/`tid` try their context or `@id` row before
@@ -60,8 +60,16 @@ The app keeps its `tl!` macro, its language setting (`"auto"` → `I18N.system_l
   `plural_form_counts` holds the same counts.
 - **Names:** a language's name comes from its shared catalog's `@id language.name` row, else its
   code; English is "English".
-- **Right to left:** `rtl` is true for `ar`, `ckb`, `dv`, `fa`, `he`, `ps`, `sd`, `ug`, `ur` and
-  `yi`; putting text into display order is the app's job.
+- **Right to left:** `direction(lang)` (and `direction_of(code)` for any tag) is `Direction::Rtl`
+  for `ar`, `arc`, `ckb`, `dv`, `fa`, `he`, `ks`, `ps`, `sd`, `syr`, `ug`, `ur` and `yi` (and the
+  legacy `iw`, `ji`), or for any tag with a right-to-left script subtag (`az-Arab`, `pa-Arab`); a
+  left-to-right script subtag wins (`sd-Deva`). `rtl` is `direction(lang).is_rtl()`. Arabic and
+  Hebrew catalogs work like any other: Arabic has six plural forms, Hebrew four. `fmt_isolated`
+  wraps each inserted value in FSI…PDI (`isolate`) so a Latin file name cannot reorder the
+  Arabic sentence around it. Mirroring the layout and putting text into display order is
+  craft-ui's `bidi` module (or the app's renderer).
+- **Legacy codes:** system tags with the withdrawn `iw`, `ji` and `in` (Java, old Android) match
+  `he`, `yi` and `id`.
 - **System locale:** `system_lang` matches the system's list once and caches it: on desktop Unix
   `LANGUAGE`, `LC_ALL`, `LC_MESSAGES` and `LANG`, read raw; elsewhere `sys-locale`'s (macOS and
   Windows preferred languages, the browser's on the web). `fr_CA.UTF-8` → `fr`, `zh-TW` →

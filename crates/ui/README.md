@@ -2,7 +2,7 @@
 
 `craft-ui` provides small egui components with application-supplied styles. `icons` prepares
 embedded SVG catalogs; `buttons` paints accessible icon buttons; `tabs` handles tab fitting and
-interaction; `layout` provides toolbar fitting, split geometry and resize handles; `theme` shares widget-state styling.
+interaction; `layout` provides toolbar fitting, split geometry and resize handles; `bidi` mirrors layouts for right-to-left languages and puts mixed-direction labels into visual order; `theme` shares widget-state styling.
 `docking` supplies transactional panel moves and an optional docking surface.
 `printing` supplies printer/job controls and asynchronous feedback used by WordCraft and GridCraft.
 The current delivery covers nine creative apps (DesignCraft, VectorCraft, PhotoCraft, FilmCraft, EffectCraft, CADCraft, PDFCraft, LightCraft and SoundCraft); prior basic and office adapters are separate. The [suite audit](../../docs/ui-components-audit.md#adoption-and-acceptance)
@@ -231,6 +231,58 @@ host submit callback and keep active work alive when closing a window. Queue-def
 represented by `None`, independently of explicit one-sided, long-edge or short-edge choices.
 Receipts and backend errors remain unmodified data for the app to display. These controls work
 on WASM too; browser PDF printing remains an app-owned service.
+
+## Keyboard shortcuts
+
+`shortcuts::ShortcutRegistry` holds each command's default chords and the user's rebindings.
+Chords are written portably (`Mod+Shift+Z`, where `Mod` is Cmd on macOS and Ctrl elsewhere) and
+displayed per platform (`⇧⌘Z` / `Ctrl+Shift+Z`). The registry reports conflicts as the current
+platform sees them (`Mod+K` and `Ctrl+K` collide on Windows and Linux only), refuses or moves
+taken chords on rebinding (`rebind` / `rebind_taking`), saves only the overrides in portable
+text and reloads them tolerantly, and `consume`s this frame's key presses most specific first.
+
+```rust,ignore
+let mut keys = ShortcutRegistry::new(Platform::from_egui(ctx.os()));
+let save = keys.register("file.save", "Save", "File", &[Chord::primary(Key::S)])?;
+for command in ctx.input_mut(|i| keys.consume(i)) { /* run it */ }
+```
+
+## Command palette
+
+`palette::CommandPalette` is a house-styled search box over `PaletteEntry` items (usually
+`PaletteEntry::from_registry`, with `enabled` set per frame). Fuzzy matching ranks word starts
+and adjacent letters, the category also matches (`file sa`), recently run commands win ties,
+arrows move, Enter runs, Escape or a click outside closes. `show` returns the chosen
+`CommandId`; the app runs it.
+
+## Right to left and bidirectional text
+
+`bidi` mirrors an interface for Arabic, Hebrew and the other right-to-left languages. Pick the
+direction once, from the interface language, and use it for every horizontal arrangement:
+
+```rust
+use craft_ui::bidi::{self, Direction};
+
+let dir = Direction::from_rtl(i18n.rtl(lang)); // or match craft_i18n::I18n::direction
+bidi::horizontal(ui, dir, |ui| {
+    ui.label(bidi::display(tl!("Save as {name}"), Some(dir)).as_ref()); // first widget at the leading edge
+});
+let split = split_rect(rect, SplitAxis::Horizontal, size, 4.0, 20.0).map(|s| if dir.is_rtl() { s.mirrored(rect) } else { s });
+```
+
+- `Direction::row`, `leading` and `trailing` give the egui `Layout` and `Align` for the
+  leading and trailing edges; `mirror_rect` and `mirror_x` mirror hand-placed geometry inside its
+  container; `SplitLayout::mirrored` puts a split's first pane on the right.
+- `logical_dx` and `logical_key` turn a horizontal drag or a Left/Right arrow into its
+  left-to-right meaning, so resize and selection code is written once.
+- `display(text, base)` returns a single-line label in visual order, by the Unicode
+  Bidirectional Algorithm (`unicode-bidi`): right-to-left runs are reversed with their combining
+  marks kept in place and their brackets mirrored, numbers and Latin runs keep their order, and
+  the direction marks and isolates (such as `craft_i18n::fmt_isolated` adds around a file name)
+  are applied and then removed. Text with nothing to reorder is borrowed unchanged. Wrap first,
+  then reorder each line. egui does not shape Arabic, so its letters draw in isolated forms.
+- `Direction::of_text` gives a string's direction from its first strong letter, for user text
+  such as a layer name.
 
 ## Compatibility and checks
 

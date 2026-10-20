@@ -5,11 +5,14 @@
 //! Applications own their assets, themes, layouts, commands and document semantics. Components
 //! accept focused style values and return egui responses; no application engine is required.
 
+pub mod bidi;
 pub mod buttons;
 pub mod docking;
 pub mod house;
 pub mod icons;
 pub mod layout;
+pub mod palette;
 pub mod printing;
+pub mod shortcuts;
 pub mod tabs;
 pub mod theme;

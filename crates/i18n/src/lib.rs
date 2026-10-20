@@ -199,12 +199,16 @@ impl I18n {
         self.locale(lang).and_then(|l| l.rows.get("@id")?.get("language.name")).map_or_else(|| self.code(lang), String::as_str)
     }
 
-    /// Whether the language is written right to left. Putting text into display order is the
-    /// app's job.
+    /// The direction the language is written in, for the layout direction of the whole
+    /// interface ([`direction_of`] of its code). English and the pseudo locale are left to right.
+    pub fn direction(&self, lang: Lang) -> Direction {
+        direction_of(self.code(lang))
+    }
+
+    /// Whether the language is written right to left: `direction(lang).is_rtl()`. Putting text
+    /// into display order is the app's job (craft-ui's `bidi` module for egui).
     pub fn rtl(&self, lang: Lang) -> bool {
-        let code = self.code(lang);
-        let language = code.split('-').next().unwrap_or(code);
-        matches!(language, "ar" | "ckb" | "dv" | "fa" | "he" | "ps" | "sd" | "ug" | "ur" | "yi")
+        self.direction(lang).is_rtl()
     }
 
     /// The language for a system locale tag (`fr_CA.UTF-8`, `zh-Hant-MO`); `C` and `POSIX` are
@@ -261,6 +265,68 @@ impl I18n {
     }
 }
 
+/// The direction a language is written in.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum Direction {
+    /// Left to right: Latin, Cyrillic, Greek, CJK, Indic scripts and most others.
+    #[default]
+    Ltr,
+    /// Right to left: Arabic, Hebrew, Thaana, Syriac, N'Ko and Adlam.
+    Rtl,
+}
+
+impl Direction {
+    /// Right to left.
+    pub fn is_rtl(self) -> bool {
+        self == Direction::Rtl
+    }
+
+    /// `"ltr"` or `"rtl"`, as HTML's `dir` attribute spells it.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Direction::Ltr => "ltr",
+            Direction::Rtl => "rtl",
+        }
+    }
+}
+
+/// The direction of a locale code or tag (`ar`, `he-IL`, `fa_IR.UTF-8`, `pa-Arab`). A script
+/// subtag decides when there is one (`az-Arab` is right to left, `sd-Deva` left to right);
+/// otherwise the language's usual script does. Unknown codes are left to right.
+pub fn direction_of(code: &str) -> Direction {
+    let code = code.trim().to_ascii_lowercase();
+    let base = code.split(['.', '@']).next().unwrap_or("");
+    let mut parts = base.split(['-', '_']).filter(|p| !p.is_empty());
+    let language = parts.next().unwrap_or("");
+    let script = parts.next().filter(|s| s.len() == 4 && s.bytes().all(|b| b.is_ascii_alphabetic()));
+    let rtl = match script {
+        Some(script) => matches!(script, "arab" | "hebr" | "thaa" | "syrc" | "nkoo" | "adlm" | "rohg" | "mand" | "samr" | "mend"),
+        None => matches!(language, "ar" | "arc" | "ckb" | "dv" | "fa" | "he" | "iw" | "ji" | "ks" | "ps" | "sd" | "syr" | "ug" | "ur" | "yi"),
+    };
+    if rtl { Direction::Rtl } else { Direction::Ltr }
+}
+
+/// First strong isolate: starts text whose direction is its own (U+2068).
+pub const FSI: char = '\u{2068}';
+/// Pop directional isolate: ends an isolate (U+2069).
+pub const PDI: char = '\u{2069}';
+
+/// `text` between [`FSI`] and [`PDI`], so its direction comes from its own first strong letter
+/// and it cannot reorder the text around it: a Latin file name inside an Arabic sentence keeps
+/// the sentence's punctuation in place.
+pub fn isolate(text: &str) -> String {
+    format!("{FSI}{text}{PDI}")
+}
+
+/// [`fmt`] with every inserted value [`isolate`]d: for values that come from the user or a
+/// document (file names, layer names) in a translated sentence. craft-ui's `bidi::display`
+/// applies and then removes the marks; a renderer without bidi support would show them.
+pub fn fmt_isolated(template: &str, args: &[(&str, &str)]) -> String {
+    let isolated: Vec<(&str, String)> = args.iter().map(|(k, v)| (*k, isolate(v))).collect();
+    let args: Vec<(&str, &str)> = isolated.iter().map(|(k, v)| (*k, v.as_str())).collect();
+    fmt(template, &args)
+}
+
 /// Fill `{name}` placeholders from `args` in one pass. Unknown placeholders stay as written, and
 /// inserted values are never read as templates, so a file name containing `{n}` stays intact.
 pub fn fmt(template: &str, args: &[(&str, &str)]) -> String {
@@ -296,6 +362,15 @@ fn candidates(tag: &str) -> Vec<String> {
     let tag = tag.trim().to_ascii_lowercase();
     let base = tag.split(['.', '@']).next().unwrap_or("").replace('_', "-");
     let mut parts: Vec<&str> = base.split('-').filter(|p| !p.is_empty()).collect();
+    // Java and old Android report the withdrawn ISO 639 codes for Hebrew, Yiddish and Indonesian.
+    if let Some(first) = parts.first_mut() {
+        *first = match *first {
+            "iw" => "he",
+            "ji" => "yi",
+            "in" => "id",
+            other => other,
+        };
+    }
     let Some(&primary) = parts.first() else {
         return Vec::new();
     };
@@ -678,9 +753,21 @@ mod tests {
     /// whose `@plural` rows list any other.
     #[test]
     fn plural_form_counts() {
-        for (locale, n) in
-            [("en", 2), ("fr", 2), ("ja", 1), ("vi", 1), ("ru", 3), ("pl", 3), ("cs", 3), ("sl", 4), ("ar", 6), ("pt", 2), ("pt-br", 2), ("tr", 2)]
-        {
+        for (locale, n) in [
+            ("en", 2),
+            ("fr", 2),
+            ("ja", 1),
+            ("vi", 1),
+            ("ru", 3),
+            ("pl", 3),
+            ("cs", 3),
+            ("sl", 4),
+            ("ar", 6),
+            ("he", 4),
+            ("pt", 2),
+            ("pt-br", 2),
+            ("tr", 2),
+        ] {
             assert_eq!(plural_rules(locale).map(|(_, c)| c.len()), Some(n), "{locale}");
         }
     }
@@ -738,6 +825,83 @@ mod tests {
     fn more_right_to_left() {
         let i = all(&[("ps", "", ""), ("ckb", "", ""), ("yi", "", ""), ("ug", "", "")]).0;
         assert!(i.languages().into_iter().skip(1).all(|l| i.rtl(l)));
+    }
+
+    static RTL: &Embedded = &[
+        (
+            "ar",
+            "@id\tlanguage.name\tالعربية\n\tSave\tحفظ\n@plural\t{n} file|{n} files\t{n} ملف|ملف {n}|ملفان {n}|{n} ملفات|{n} ملفًا|{n} ملفٍ\n",
+            "\tSave as {name}\tحفظ باسم {name}\n",
+        ),
+        ("he", "@id\tlanguage.name\tעברית\n\tSave\tשמירה\n@plural\t{n} file|{n} files\tקובץ {n}|{n} קבצים|{n} קבצים|{n} קבצים\n", ""),
+        ("fr", "\tSave\tEnregistrer\n", ""),
+    ];
+
+    #[test]
+    fn arabic_and_hebrew_catalogs() {
+        let (i, problems) = all(RTL);
+        assert!(problems.is_empty(), "{problems:?}");
+        let (ar, he, fr) = (lang(&i, "ar"), lang(&i, "he"), lang(&i, "fr"));
+        assert_eq!(i.t(ar, "Save"), "حفظ");
+        assert_eq!(i.t(he, "Save"), "שמירה");
+        assert_eq!(i.name(ar), "العربية");
+        assert_eq!(i.name(he), "עברית");
+        assert_eq!(
+            (i.direction(ar), i.direction(he), i.direction(fr), i.direction(Lang::EN)),
+            (Direction::Rtl, Direction::Rtl, Direction::Ltr, Direction::Ltr)
+        );
+        assert!(i.rtl(ar) && i.rtl(he) && !i.rtl(Lang::PSEUDO));
+        let files = |l, n| i.trn(l, n, "{n} file", "{n} files");
+        let arabic: Vec<String> = [0, 1, 2, 3, 11, 100].into_iter().map(|n| files(ar, n)).collect();
+        assert_eq!(arabic, ["0 ملف", "ملف 1", "ملفان 2", "3 ملفات", "11 ملفًا", "100 ملفٍ"]);
+        let hebrew: Vec<String> = [1, 2, 20, 3].into_iter().map(|n| files(he, n)).collect();
+        assert_eq!(hebrew, ["קובץ 1", "2 קבצים", "20 קבצים", "3 קבצים"]);
+        let template = i.t(ar, "Save as {name}");
+        assert_eq!(fmt_isolated(template, &[("name", "report.pdf")]), "حفظ باسم \u{2068}report.pdf\u{2069}");
+    }
+
+    #[test]
+    fn arabic_and_hebrew_system_tags() {
+        let i = all(RTL).0;
+        for (tag, want) in [("ar_EG.UTF-8", "ar"), ("ar-SA", "ar"), ("he_IL.UTF-8", "he"), ("iw_IL", "he"), ("iw", "he"), ("ar-Arab-EG", "ar")] {
+            assert_eq!(i.match_tag(tag).map(|l| i.code(l)), Some(want), "{tag}");
+        }
+    }
+
+    #[test]
+    fn direction_of_codes_and_scripts() {
+        for code in [
+            "ar",
+            "ar-EG",
+            "he",
+            "he_IL.UTF-8",
+            "iw",
+            "fa",
+            "ur",
+            "yi",
+            "ckb",
+            "dv",
+            "ps",
+            "sd",
+            "ug",
+            "ks",
+            "syr",
+            "az-Arab",
+            "pa-Arab-PK",
+            "uz_Arab",
+        ] {
+            assert_eq!(direction_of(code), Direction::Rtl, "{code}");
+        }
+        for code in ["en", "fr", "zh-hant", "sr-latn", "sd-Deva", "ks-Deva", "ar-Latn", "", "c", "pseudo", "ku"] {
+            assert_eq!(direction_of(code), Direction::Ltr, "{code}");
+        }
+        assert_eq!((Direction::Rtl.as_str(), Direction::default().as_str()), ("rtl", "ltr"));
+    }
+
+    #[test]
+    fn isolate_wraps_and_fmt_isolated_wraps_only_values() {
+        assert_eq!(isolate("abc"), "\u{2068}abc\u{2069}");
+        assert_eq!(fmt_isolated("{a} and {b} and {c}", &[("a", "x"), ("b", "{c}")]), "\u{2068}x\u{2069} and \u{2068}{c}\u{2069} and {c}");
     }
 
     /// Prints what this machine reports, so CI logs show `system_lang` on each platform.

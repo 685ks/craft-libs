@@ -51,6 +51,15 @@ impl SplitLayout {
         self.available
     }
 
+    /// The same split mirrored left to right inside `within` (normally the rectangle it was laid
+    /// out in), for a right-to-left interface: the first child moves to the right edge. Sizes are
+    /// unchanged. A horizontal drag on the mirrored divider grows the first child when it moves
+    /// left, so pass `-delta` (or `craft_ui::bidi::Direction::logical_dx`) to [`Self::resized`].
+    pub fn mirrored(self, within: Rect) -> Self {
+        let flip = |r: Rect| Rect::from_x_y_ranges((within.min.x + within.max.x - r.max.x)..=(within.min.x + within.max.x - r.min.x), r.y_range());
+        Self { first: flip(self.first), divider: flip(self.divider), second: flip(self.second), ..self }
+    }
+
     /// Propose a new size after moving the divider by `delta` points.
     ///
     /// The sizing mode is retained. `minimum` may differ from the minimum used for layout, e.g.

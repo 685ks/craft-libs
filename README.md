@@ -27,6 +27,9 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 - [`craft-pdf`](crates/pdf/README.md): independently optional PDF parsing, interpretation, rasterization and guarded authoring. Apps retain layout, fonts, editing and export policy; writer-only consumers do not enable the shared reader.
 
 - [`craft-tokens`](crates/tokens/README.md): the house design tokens (colours, type, spacing, radii, shadows, motion) generated from `tokens.json`, with optional egui conversions. `craft-ui`'s `house` module turns them into the egui theme and shared components (framed panel and header, status boxes, chips, the primary button with its busy state, skeletons).
+- [`craft-ai-client`](crates/ai-client/README.md): HTTP providers for craft-ai-core: OpenAI-compatible
+  servers (OpenAI, LM Studio, vLLM), Ollama and Black Forest Labs image jobs, with streaming,
+  polling, timeouts, retries and keys from `craft-secrets`. Desktop only.
 - [`craft-atomic`](crates/atomic/README.md): Crash-safe atomic file writing and replacement with same-directory staging, directory fsync, Apple `F_FULLFSYNC` fallback, transient lock backoff, and fault injection for the Craft suite.
 - [`craft-cms`](crates/cms/README.md): pure-Rust ICC v2/v4 colour management: profile parsing
   and writing, transforms, rendering intents, black point compensation, soft proofing, gamut
@@ -35,8 +38,8 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
   document may be opened. Paths stored in documents are followed only when they are local or on the
   document's own network share; other network paths, device paths and non-file URLs are refused.
 - [`craft-i18n`](crates/i18n/README.md): translations over the embedded craft-i18n catalogs:
-  lookup with fallback (`pt-br` → `pt` → English), plurals, language names, the system locale and
-  a pseudo locale. The catalogs stay a fully optional build input; apps keep `tl!` and their
+  lookup with fallback (`pt-br` → `pt` → English), plurals, language names, the system locale,
+  writing direction (Arabic, Hebrew and other right-to-left locales) and a pseudo locale. The catalogs stay a fully optional build input; apps keep `tl!` and their
   language setting.
 - [`craft-print`](crates/print/README.md): PDF submission to CUPS and Windows, printer discovery,
   duplex/copies/colour and driver preferences. PDF generation stays in each app.
@@ -44,8 +47,14 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 - [`craft-quit`](crates/quit/src/lib.rs): native macOS quit, egui close handling and an optional
   app menu. Unsaved-document decisions and save prompts stay in each app.
 
+- [`craft-recent`](crates/recent/README.md): the Open Recent list (a serde type for the app's
+  settings), autosave timing, and crash-recovery snapshots with orphan detection by session lock.
+- [`craft-secrets`](crates/secrets/README.md): OS keychain storage (macOS Keychain, Windows
+  Credential Manager, Secret Service) for the secrets a `SecretRef` names, plus an in-memory store.
 - [`craft-settings`](crates/settings/README.md): `config.toml` settings storage for every app: platform folders, portable mode and overrides, atomic saves while running, backup, damaged-file recovery and schema migrations. Policy in [docs/settings-storage.md](docs/settings-storage.md).
-- [`craft-ui`](crates/ui/README.md): SVG catalogs, icon buttons, tabs, pane controls, transactional docking, print settings and theme helpers for egui frontends;
+- [`craft-undo`](crates/undo/README.md): the shared undo/redo stack: a command trait, coalescing
+  of adjacent edits, undo/redo with menu labels, a depth limit and the clean-state marker.
+- [`craft-ui`](crates/ui/README.md): SVG catalogs, icon buttons, tabs, pane controls, transactional docking, print settings, theme helpers, a keyboard-shortcut registry, a command palette and right-to-left mirroring with bidi label reordering for egui frontends;
   assets, themes, localization and command handling stay in each app. Requires Rust 1.95 or later.
 - [Shared UI component audit](docs/ui-components-audit.md): source inventory, extraction priorities
   and compatibility boundaries across the Craft suite.
@@ -53,6 +62,13 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
   widget-state styling boundary.
 - [Panel docking](docs/ui-docking.md): validated panel moves, floating groups, workspace adapters
   and an optional egui docking surface.
+
+## Versions and releases
+
+Every crate shares the workspace version, and internal crates pin each other at exactly that
+version. Changes are recorded in [CHANGELOG.md](CHANGELOG.md), which also describes how to cut a
+release: the **Tag release** workflow pushes the `vX.Y.Z` tag on `main`, and apps can then depend
+on `tag = "vX.Y.Z"` instead of a bare `rev`.
 
 ## License and credits
 
