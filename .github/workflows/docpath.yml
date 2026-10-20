@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: docpath-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   docpath:
     timeout-minutes: 15

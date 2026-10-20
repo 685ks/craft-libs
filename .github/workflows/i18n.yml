@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: i18n-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   i18n:
     timeout-minutes: 15

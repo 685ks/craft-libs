@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ai-core-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ai-core:
     timeout-minutes: 15

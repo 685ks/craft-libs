@@ -8,6 +8,10 @@ on:
     paths: ['crates/print/**', 'Cargo.toml', 'Cargo.lock', '.github/workflows/print.yml']
 permissions:
   contents: read
+
+concurrency:
+  group: print-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   print:
     timeout-minutes: 30
