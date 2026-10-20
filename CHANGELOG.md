@@ -42,7 +42,8 @@ First tagged release. Every crate starts at 0.1.0.
   backup, damaged-file recovery and schema migrations.
 - `craft-tokens`: the house design tokens generated from `tokens.json`, with egui conversions.
 - `craft-ui`: SVG catalogs, icon buttons, tabs, pane controls, transactional docking, print
-  settings, theme helpers and the `house` theme and components.
+  settings, theme helpers, the `house` theme and components, the keyboard-shortcut registry
+  (platform-aware `Mod`, conflict detection, rebinding, saved overrides) and the command palette.
 - `craft-undo`: the shared undo/redo stack with a command trait, coalescing, menu labels, a
   depth limit, the clean-state marker and a revision counter for autosave.
 - `craft-recent`: the Open Recent list, autosave timing with back-off, and crash-recovery

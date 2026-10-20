@@ -232,6 +232,29 @@ represented by `None`, independently of explicit one-sided, long-edge or short-e
 Receipts and backend errors remain unmodified data for the app to display. These controls work
 on WASM too; browser PDF printing remains an app-owned service.
 
+## Keyboard shortcuts
+
+`shortcuts::ShortcutRegistry` holds each command's default chords and the user's rebindings.
+Chords are written portably (`Mod+Shift+Z`, where `Mod` is Cmd on macOS and Ctrl elsewhere) and
+displayed per platform (`⇧⌘Z` / `Ctrl+Shift+Z`). The registry reports conflicts as the current
+platform sees them (`Mod+K` and `Ctrl+K` collide on Windows and Linux only), refuses or moves
+taken chords on rebinding (`rebind` / `rebind_taking`), saves only the overrides in portable
+text and reloads them tolerantly, and `consume`s this frame's key presses most specific first.
+
+```rust,ignore
+let mut keys = ShortcutRegistry::new(Platform::from_egui(ctx.os()));
+let save = keys.register("file.save", "Save", "File", &[Chord::primary(Key::S)])?;
+for command in ctx.input_mut(|i| keys.consume(i)) { /* run it */ }
+```
+
+## Command palette
+
+`palette::CommandPalette` is a house-styled search box over `PaletteEntry` items (usually
+`PaletteEntry::from_registry`, with `enabled` set per frame). Fuzzy matching ranks word starts
+and adjacent letters, the category also matches (`file sa`), recently run commands win ties,
+arrows move, Enter runs, Escape or a click outside closes. `show` returns the chosen
+`CommandId`; the app runs it.
+
 ## Compatibility and checks
 
 The crate uses egui 0.36 and Rust 1.95 or later. Its production dependency disables egui's default

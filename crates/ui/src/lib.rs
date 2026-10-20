@@ -10,6 +10,8 @@ pub mod docking;
 pub mod house;
 pub mod icons;
 pub mod layout;
+pub mod palette;
 pub mod printing;
+pub mod shortcuts;
 pub mod tabs;
 pub mod theme;
