@@ -19,7 +19,9 @@ fn generated_rs_matches_tokens_json() {
         std::fs::write(&path, &generated).unwrap();
         return;
     }
-    let committed = std::fs::read_to_string(&path).unwrap_or_default();
+    // A Windows checkout with `core.autocrlf` turns the committed file's line endings into CRLF;
+    // compare the content, not the line endings.
+    let committed = std::fs::read_to_string(&path).unwrap_or_default().replace("\r\n", "\n");
     assert!(
         committed == generated,
         "src/generated.rs is out of date with tokens.json; run `CRAFT_TOKENS_REGENERATE=1 cargo test -p craft-tokens --test generated_is_current`"
