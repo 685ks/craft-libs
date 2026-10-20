@@ -1,0 +1,70 @@
+name: Tag release
+
+# Creates the annotated tag vX.Y.Z on the current tip of main and pushes it with GITHUB_TOKEN.
+# Run it from the Actions tab after the release commit (CHANGELOG section and version bump) is
+# on main. It refuses to run from another branch, for a version that does not match Cargo.toml
+# or has no dated CHANGELOG section, or when the tag already exists.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag, without the leading v (for example 0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tag-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Tag release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Refuse to run outside main
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$REF" != "refs/heads/main" ]; then
+            echo "::error::Run this workflow on main (it was started on $REF)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Check the version, the pins and the changelog
+        env:
+          VERSION: ${{ inputs.version }}
+        run: scripts/check-version.sh "$VERSION"
+
+      - name: Refuse an existing tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null \
+            || git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
+            echo "::error::Tag v$VERSION already exists."
+            exit 1
+          fi
+
+      - name: Create and push the tag
+        env:
+          VERSION: ${{ inputs.version }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "craft-libs v$VERSION" -m "Tagged by $ACTOR from the Tag release workflow."
+          git push origin "refs/tags/v$VERSION"
+          echo "Tagged $(git rev-parse --short HEAD) as v$VERSION" >> "$GITHUB_STEP_SUMMARY"

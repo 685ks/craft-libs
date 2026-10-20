@@ -54,6 +54,13 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 - [Panel docking](docs/ui-docking.md): validated panel moves, floating groups, workspace adapters
   and an optional egui docking surface.
 
+## Versions and releases
+
+Every crate shares the workspace version, and internal crates pin each other at exactly that
+version. Changes are recorded in [CHANGELOG.md](CHANGELOG.md), which also describes how to cut a
+release: the **Tag release** workflow pushes the `vX.Y.Z` tag on `main`, and apps can then depend
+on `tag = "vX.Y.Z"` instead of a bare `rev`.
+
 ## License and credits
 
 craft-libs is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
