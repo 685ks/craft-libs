@@ -7,6 +7,7 @@
 
 pub mod buttons;
 pub mod docking;
+pub mod house;
 pub mod icons;
 pub mod layout;
 pub mod printing;

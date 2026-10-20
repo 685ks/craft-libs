@@ -1,0 +1,20 @@
+[package]
+name = "craft-tokens"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+description = "House design tokens for the Craft apps, generated from tokens.json"
+
+[lints]
+workspace = true
+
+[dependencies]
+egui = { workspace = true, optional = true }
+
+[features]
+egui = ["dep:egui"]
+
+[dev-dependencies]
+serde_json = { workspace = true }
