@@ -24,6 +24,17 @@ bump (`0.1` to `0.2`) may break the public API of any crate; a patch bump does n
 - `craft-ai-client`: `Provider` adapters over HTTP for OpenAI-compatible servers (OpenAI, LM
   Studio, vLLM), Ollama and Black Forest Labs image jobs, with SSE and NDJSON streaming, job
   polling, timeouts, retry with backoff and API keys from a `SecretStore`.
+- `craft-i18n`: `Direction` and `direction_of` for a locale's writing direction (script subtags
+  decide, so `az-Arab` is right to left and `sd-Deva` left to right), `I18n::direction`, `isolate`
+  and `fmt_isolated` to keep inserted values from reordering a translated sentence, and the
+  legacy `iw`/`ji`/`in` system codes. Arabic and Hebrew catalogs and plurals are tested.
+- `craft-ui`: the `bidi` module: a layout `Direction` with mirrored rows, alignments, rectangles
+  and arrow keys, `SplitLayout::mirrored`, and `display`, which puts mixed-direction labels into
+  visual order with `unicode-bidi`.
+
+### Changed
+
+- `craft-i18n`: `rtl` now also covers `arc`, `ks`, `syr` and right-to-left script subtags.
 
 ## [0.1.0] - 2026-10-20
 

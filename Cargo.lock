@@ -906,6 +906,7 @@ dependencies = [
  "image",
  "serde",
  "serde_json",
+ "unicode-bidi",
 ]
 
 [[package]]

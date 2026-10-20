@@ -38,8 +38,8 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
   document may be opened. Paths stored in documents are followed only when they are local or on the
   document's own network share; other network paths, device paths and non-file URLs are refused.
 - [`craft-i18n`](crates/i18n/README.md): translations over the embedded craft-i18n catalogs:
-  lookup with fallback (`pt-br` → `pt` → English), plurals, language names, the system locale and
-  a pseudo locale. The catalogs stay a fully optional build input; apps keep `tl!` and their
+  lookup with fallback (`pt-br` → `pt` → English), plurals, language names, the system locale,
+  writing direction (Arabic, Hebrew and other right-to-left locales) and a pseudo locale. The catalogs stay a fully optional build input; apps keep `tl!` and their
   language setting.
 - [`craft-print`](crates/print/README.md): PDF submission to CUPS and Windows, printer discovery,
   duplex/copies/colour and driver preferences. PDF generation stays in each app.
@@ -54,7 +54,7 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 - [`craft-settings`](crates/settings/README.md): `config.toml` settings storage for every app: platform folders, portable mode and overrides, atomic saves while running, backup, damaged-file recovery and schema migrations. Policy in [docs/settings-storage.md](docs/settings-storage.md).
 - [`craft-undo`](crates/undo/README.md): the shared undo/redo stack: a command trait, coalescing
   of adjacent edits, undo/redo with menu labels, a depth limit and the clean-state marker.
-- [`craft-ui`](crates/ui/README.md): SVG catalogs, icon buttons, tabs, pane controls, transactional docking, print settings, theme helpers, a keyboard-shortcut registry and a command palette for egui frontends;
+- [`craft-ui`](crates/ui/README.md): SVG catalogs, icon buttons, tabs, pane controls, transactional docking, print settings, theme helpers, a keyboard-shortcut registry, a command palette and right-to-left mirroring with bidi label reordering for egui frontends;
   assets, themes, localization and command handling stay in each app. Requires Rust 1.95 or later.
 - [Shared UI component audit](docs/ui-components-audit.md): source inventory, extraction priorities
   and compatibility boundaries across the Craft suite.

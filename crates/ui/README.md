@@ -2,7 +2,7 @@
 
 `craft-ui` provides small egui components with application-supplied styles. `icons` prepares
 embedded SVG catalogs; `buttons` paints accessible icon buttons; `tabs` handles tab fitting and
-interaction; `layout` provides toolbar fitting, split geometry and resize handles; `theme` shares widget-state styling.
+interaction; `layout` provides toolbar fitting, split geometry and resize handles; `bidi` mirrors layouts for right-to-left languages and puts mixed-direction labels into visual order; `theme` shares widget-state styling.
 `docking` supplies transactional panel moves and an optional docking surface.
 `printing` supplies printer/job controls and asynchronous feedback used by WordCraft and GridCraft.
 The current delivery covers nine creative apps (DesignCraft, VectorCraft, PhotoCraft, FilmCraft, EffectCraft, CADCraft, PDFCraft, LightCraft and SoundCraft); prior basic and office adapters are separate. The [suite audit](../../docs/ui-components-audit.md#adoption-and-acceptance)
@@ -254,6 +254,35 @@ for command in ctx.input_mut(|i| keys.consume(i)) { /* run it */ }
 and adjacent letters, the category also matches (`file sa`), recently run commands win ties,
 arrows move, Enter runs, Escape or a click outside closes. `show` returns the chosen
 `CommandId`; the app runs it.
+
+## Right to left and bidirectional text
+
+`bidi` mirrors an interface for Arabic, Hebrew and the other right-to-left languages. Pick the
+direction once, from the interface language, and use it for every horizontal arrangement:
+
+```rust
+use craft_ui::bidi::{self, Direction};
+
+let dir = Direction::from_rtl(i18n.rtl(lang)); // or match craft_i18n::I18n::direction
+bidi::horizontal(ui, dir, |ui| {
+    ui.label(bidi::display(tl!("Save as {name}"), Some(dir)).as_ref()); // first widget at the leading edge
+});
+let split = split_rect(rect, SplitAxis::Horizontal, size, 4.0, 20.0).map(|s| if dir.is_rtl() { s.mirrored(rect) } else { s });
+```
+
+- `Direction::row`, `leading` and `trailing` give the egui `Layout` and `Align` for the
+  leading and trailing edges; `mirror_rect` and `mirror_x` mirror hand-placed geometry inside its
+  container; `SplitLayout::mirrored` puts a split's first pane on the right.
+- `logical_dx` and `logical_key` turn a horizontal drag or a Left/Right arrow into its
+  left-to-right meaning, so resize and selection code is written once.
+- `display(text, base)` returns a single-line label in visual order, by the Unicode
+  Bidirectional Algorithm (`unicode-bidi`): right-to-left runs are reversed with their combining
+  marks kept in place and their brackets mirrored, numbers and Latin runs keep their order, and
+  the direction marks and isolates (such as `craft_i18n::fmt_isolated` adds around a file name)
+  are applied and then removed. Text with nothing to reorder is borrowed unchanged. Wrap first,
+  then reorder each line. egui does not shape Arabic, so its letters draw in isolated forms.
+- `Direction::of_text` gives a string's direction from its first strong letter, for user text
+  such as a layer name.
 
 ## Compatibility and checks
 
