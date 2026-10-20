@@ -44,6 +44,8 @@ craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit
 - [`craft-quit`](crates/quit/src/lib.rs): native macOS quit, egui close handling and an optional
   app menu. Unsaved-document decisions and save prompts stay in each app.
 
+- [`craft-recent`](crates/recent/README.md): the Open Recent list (a serde type for the app's
+  settings), autosave timing, and crash-recovery snapshots with orphan detection by session lock.
 - [`craft-settings`](crates/settings/README.md): `config.toml` settings storage for every app: platform folders, portable mode and overrides, atomic saves while running, backup, damaged-file recovery and schema migrations. Policy in [docs/settings-storage.md](docs/settings-storage.md).
 - [`craft-undo`](crates/undo/README.md): the shared undo/redo stack: a command trait, coalescing
   of adjacent edits, undo/redo with menu labels, a depth limit and the clean-state marker.

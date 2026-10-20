@@ -658,6 +658,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "craft-recent"
+version = "0.1.0"
+dependencies = [
+ "craft-atomic",
+ "craft-settings",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "craft-settings"
 version = "0.1.0"
 dependencies = [

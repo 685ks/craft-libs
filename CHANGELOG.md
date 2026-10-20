@@ -45,4 +45,6 @@ First tagged release. Every crate starts at 0.1.0.
   settings, theme helpers and the `house` theme and components.
 - `craft-undo`: the shared undo/redo stack with a command trait, coalescing, menu labels, a
   depth limit, the clean-state marker and a revision counter for autosave.
+- `craft-recent`: the Open Recent list, autosave timing with back-off, and crash-recovery
+  snapshots on `craft-atomic` and `craft-settings`, with orphan detection by session lock.
 - Release tooling: this changelog, `scripts/check-version.sh` and the **Tag release** workflow.
