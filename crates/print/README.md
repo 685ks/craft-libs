@@ -102,7 +102,7 @@ its runner. Two ignored tests check a real printer by hand: `an_installed_driver
 and `CRAFT_PRINT_TEST_DUPLEX=long`). Physical printer fidelity remains a hardware check.
 
 The cross-platform GitHub Actions workflow is defined in `.github/workflows/print.yml`.
-It runs formatting, Clippy and this crate's own tests on Windows, Linux and macOS when print
+It runs formatting, Clippy and this crate's own tests on Windows when print
 code changes, and supports manual runs. The Windows job executes the spooler regression above;
 physical printer fidelity still requires hardware verification.
 
