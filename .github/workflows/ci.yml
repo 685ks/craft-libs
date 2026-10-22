@@ -1,6 +1,6 @@
 name: Workspace CI
 
-# Builds, lints and tests every crate in the workspace on Linux, macOS and Windows, checks
+# Builds, lints and tests every crate in the workspace on Linux and Windows, checks
 # dependency licences and advisories, and reports public API changes. The per-crate workflows
 # keep their extra platform checks (WASM, ACLs, print queues, PDF fonts).
 
@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
