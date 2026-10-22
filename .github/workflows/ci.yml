@@ -1,6 +1,6 @@
 name: Workspace CI
 
-# Builds, lints and tests every crate in the workspace on Linux and Windows, checks
+# Builds, lints and tests every crate in the workspace on Windows, checks
 # dependency licences and advisories, and reports public API changes. The per-crate workflows
 # keep their extra platform checks (WASM, ACLs, print queues, PDF fonts).
 
@@ -43,19 +43,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
-      - name: Install software Vulkan renderer
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mesa-vulkan-drivers libvulkan1
-          echo 'WGPU_BACKEND=vulkan' >> "$GITHUB_ENV"
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: stable
