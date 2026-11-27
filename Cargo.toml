@@ -8,7 +8,7 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 rust-version = "1.95"
-repository = "https://github.com/storytold/craft-libs"
+repository = "https://github.com/685ks/craft-libs"
 
 [workspace.dependencies]
 # internal: add each crate here as `craft-<name> = { path = "crates/<name>", version = "=<workspace version>" }`;
