@@ -18,7 +18,7 @@ A Cargo workspace (edition 2024, resolver 3). Each library is a crate under `cra
 Apps depend on a crate by git:
 
 ```toml
-craft-<name> = { git = "https://github.com/storytold/craft-libs", rev = "<commit>" }
+craft-<name> = { git = "https://github.com/685ks/craft-libs", rev = "<commit>" }
 ```
 
 ## Libraries
